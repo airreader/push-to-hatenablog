@@ -1,5 +1,5 @@
 #!/bin/sh
 
-eval "$(cat .env <(echo) <(declare -x))"
+source ./.env
 
 docker-compose run --rm blogsync pull $DOMAIN
