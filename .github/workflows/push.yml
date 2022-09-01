@@ -1,14 +1,16 @@
 name: push to hatena blog
 
 on: 
-  push:
-    branches-ignore:
-      - master
+  pull_request:
+    branches:
+      - main
+    types: [closed]
 
 jobs:
-  push:
+  tag:
     name: push
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
     steps:
 
     - name: Set up Go 1.13
@@ -23,12 +25,16 @@ jobs:
         key: ${{ runner.os }}-go-blogsync-200423.0756
         restore-keys: |
           ${{ runner.os }}-go-blogsync-200423.0756
-
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-
-    - run: git fetch origin master
-
+      uses: actions/checkout@v3
+      with: 
+        fetch-depth: 3
+        
+    - run: |
+        git fetch origin main
+        git fetch origin ${{github.event.pull_request.head.ref}}
+        echo "MAIN_SHA=$(git rev-parse origin/main~)" >> $GITHUB_ENV
+        :
     - name: Setup blogsync
       env:
         BSY: ${{ secrets.BSY }}
@@ -37,15 +43,13 @@ jobs:
           go get github.com/x-motemen/blogsync;
         fi
         echo -e ${BSY} > blogsync.yaml
-
     - name: push
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
-        git diff origin/master --name-only \
+        git diff --name-only ${{env.MAIN_SHA}} ${{github.event.pull_request.head.sha}} -- \
         | grep entries/${DOMAIN}/entry \
         | xargs -t -n1 ~/go/bin/blogsync push
-
     # - name: notify to slack
     #   uses: mm0202/action_slack-notify@master
     #   if: always()
