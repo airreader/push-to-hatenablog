@@ -47,7 +47,7 @@ docker-compose run --rm blogsync post --title=draft --draft --custom-path=${path
 ```
 
 ## 編集した記事の更新
-編集した記事ファイルをGitHubへプッシュすると、GitHubアクションによってmasterブランチからの差分がはてなブログでも更新されます。
+記事を編集したブランチを作成し、そのpull-requestがmainへマージされると、差分がGithub Actionsにより、はてなブログで更新されます。
 
 GitHubアクションの設定は以下を確認してください。
 
@@ -83,7 +83,7 @@ Slackに更新ワークフローの結果を通知する場合は、[.github/wor
 `npm`(または`yarn`)環境がある場合は、`npm run pull`(または`yarn run pull`)でも記事を取得できます。
 
 ### 記事の投稿
-`scripts/pull.sh`の`custom_path=[custom_path]`の部分に投稿する記事のカスタムパスを設定して、ルートディレクトリで`scripts/pull.sh`を実行してください。
+ルートディレクトリで`scripts/pull.sh {記事のpath}`を実行してください。
 
-`npm`(または`yarn`)環境がある場合は、`npm run push`(または`yarn run push`)でも記事を取得できます。
+`npm`(または`yarn`)環境がある場合は、`npm run push -path='パス名'`(または`yarn run push`)で記事を下書き状態で新規作成できます
 
