@@ -23,7 +23,11 @@ jobs:
         key: ${{ runner.os }}-go-blogsync-200423.0756
         restore-keys: |
           ${{ runner.os }}-go-blogsync-200423.0756
-
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v3
+        
+    - run: |
+        git fetch origin main
     - name: Setup blogsync
       env:
         BSY: ${{ secrets.BSY }}
@@ -36,16 +40,14 @@ jobs:
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
-        echo ${{github.event.issue.body}} \
-        | grep ^path: \
-        | sed -e 's/^path:\(.*\)/\1/g' \
+        echo '${{github.event.issue.body}}' \
+        | grep '^path:' \
+        | sed -e "s/path:\(.*\)[ \f\n\r\t]/\1/g" \
         | xargs -t -n1 -I{} ~/go/bin/blogsync post --title=draft --draft --custom-path={} ${{ secrets.DOMAIN }} ""
-
-    #    git diff --name-only ${{env.MAIN_SHA}} ${{github.event.pull_request.head.sha}} -- \
-    #    | grep entries/${DOMAIN}/entry \
-    #    | xargs -t -n1 ~/go/bin/blogsync push
-    # - name: notify to slack
-    #   uses: mm0202/action_slack-notify@master
-    #   if: always()
-    #   env:
-    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    - name: push to repository
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .
+        git commit -m "generated from ${{ github.event.issue.html_url }}"
+        git push
