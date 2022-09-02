@@ -1,0 +1,51 @@
+name: post to hatena blog
+
+on: 
+  issues:
+    types: [closed]
+
+jobs:
+  tag:
+    name: post
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.issue.title, 'Post:')
+    steps:
+
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+
+    - uses: actions/cache@v1
+      with:
+        path: ~/go/bin/
+        key: ${{ runner.os }}-go-blogsync-200423.0756
+        restore-keys: |
+          ${{ runner.os }}-go-blogsync-200423.0756
+
+    - name: Setup blogsync
+      env:
+        BSY: ${{ secrets.BSY }}
+      run: |
+        if !(type ~/go/bin/blogsync > /dev/null 2>&1); then
+          go get github.com/x-motemen/blogsync;
+        fi
+        echo -e ${BSY} > blogsync.yaml
+    - name: post
+      env:
+        DOMAIN: ${{ secrets.DOMAIN }}
+      run: |
+        echo ${{github.event.issue.body}} \
+        | grep ^path: \
+        | sed -e 's/^path:\(.*\)/\1/g' \
+        | xargs -t -n1 -I{} ~/go/bin/blogsync post --title=draft --draft --custom-path={} ${{ secrets.DOMAIN }} ""
+
+    #    git diff --name-only ${{env.MAIN_SHA}} ${{github.event.pull_request.head.sha}} -- \
+    #    | grep entries/${DOMAIN}/entry \
+    #    | xargs -t -n1 ~/go/bin/blogsync push
+    # - name: notify to slack
+    #   uses: mm0202/action_slack-notify@master
+    #   if: always()
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
