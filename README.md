@@ -1,16 +1,11 @@
 # push-to-hatenablog
- GitHubとはてなブログの連携用環境。PullRequestにて変更点を作成し、それがマージされたタイミングではてなブログの記事も更新されます。
+ GitHubとはてなブログの連携用環境。
+ - issueを利用して、記事を作成することができます
+ - PullRequestにて変更点を作成し、それがマージされたタイミングではてなブログの記事も更新されます
 
 ## セットアップ
 ### GitHubリポジトリの追加
 はてなブログ記事の管理用にGitHubリポジトリを作成してください。
-### `blogsync.yaml`の追加
-`blogsync.example.yaml`を`blogsync.yaml`に変更して、ドメイン名やユーザ名を書き換えてください。  
-ローカル環境から記事を新規追加するために使用します。
-
-`blogsync.yaml`については、以下のページを参照してください。
-
-[x-motemen/blogsync #Configuration](https://github.com/x-motemen/blogsync#configuration)
 
 ### Secretの追加
 GitHubリポジトリに以下の２つのSecretを追加してください。  
@@ -29,22 +24,35 @@ default:\n
 
 [暗号化されたシークレットの作成と保存 #暗号化されたシークレットの作成](https://help.github.com/ja/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets#about-encrypted-secrets)
 
-## はてなブログからの記事取得
-既存記事をはてなブログから取得する場合は、`domain`変数を指定してから、masterブランチで以下のコマンドを実行してください。
-```bash
-docker-compose run --rm blogsync pull ${domain}
-```
-はてなブログの更新はmasterブランチからの差分が対象となります。
+### ローカル環境のセットアップ
+#### `blogsync.yaml`の追加
+`blogsync.example.yaml`を`blogsync.yaml`に変更して、ドメイン名やユーザ名を書き換えてください。  
+ローカル環境から記事を新規追加するために使用します。
 
-記事数が多いとはてなブログの更新に時間がかかるため、masterブランチで記事を取得・コミットして、ブログの更新を回避してください。
+`blogsync.yaml`については、以下のページを参照してください。
 
-特に初回の記事取得など記事数が多い場合はmasterブランチで取得するようにしてください。
+[x-motemen/blogsync #Configuration](https://github.com/x-motemen/blogsync#configuration)
 
-## 新しい記事の追加
-`path`と`domain`変数を設定して、以下のコマンドを実行するとはてなブログとローカルに下書きが追加されます。
-```bash
-docker-compose run --rm blogsync post --title=draft --draft --custom-path=${path} ${domain} < draft.md
-```
+### `.env、` の追加
+.env`ファイルを作成して`DOMAIN=[ブログのドメイン]`を追加してください。
+
+### はてなブログからの記事取得
+`npm run pull` で全記事をローカルに取得します。
+
+はてなブログの更新はmainブランチとpull-requestとの差分が対象となります。
+記事数が多いとはてなブログの更新に時間がかかるため、mainブランチで記事を取得・コミットして、ブログの更新を回避してください。
+
+特に初回の記事取得など記事数が多い場合は、mainブランチに全記事をコミットしてください。
+
+### 新規記事の投稿
+新規記事の投稿は、まず下書き状態のDraftを作成してから
+#### Githubのissueを利用した投稿 
+新規記事作成用のissueを立て、作成したいエントリのpathを指定します。
+issueがcloseされると、はてなブログに下書き記事が作成され、リポジトリにもentryが追加されます。
+ただし、 secret に指定したユーザーが著者となるため、寄稿記事としたい場合には、ローカルから自身のID、トークンを使って post してください。
+
+#### ローカルからの記事の投稿
+`npm run push -path='パス名'`で記事を下書き状態で新規作成できます
 
 ## 編集した記事の更新
 記事を編集したブランチを作成し、そのpull-requestがmainへマージされると、差分がGithub Actionsにより、はてなブログで更新されます。
@@ -54,6 +62,7 @@ GitHubアクションの設定は以下を確認してください。
 [.github/workflows/push.yml](.github/workflows/push.yml)
 
 ※ masterブランチからの差分が更新対象となるため、masterブランチで記事ファイルを編集しても記事の更新は実行されません。master以外のブランチで編集してください。
+
 
 ## Slack通知設定
 ### `.github/workflows/push.yml`の調整
@@ -72,18 +81,11 @@ Slackに更新ワークフローの結果を通知する場合は、[.github/wor
 | - | - 
 | SLACK_WEBHOOK_URL | Incoming Webhookで指定されたWebhook URL
 
-## `scripts`ディレクトリについて
-`scripts`ディレクトリに記事の取得、投稿スクリプトを設置しています。
 
-`scripts`内のスクリプトを使用する場合は、`.env`ファイルを作成して`DOMAIN=[ブログのドメイン]`を追加してください。
 
-### 記事の取得
-ルートディレクトリで`scripts/pull.sh`を実行してください。
 
-`npm`(または`yarn`)環境がある場合は、`npm run pull`(または`yarn run pull`)でも記事を取得できます。
 
-### 記事の投稿
-ルートディレクトリで`scripts/pull.sh {記事のpath}`を実行してください。
 
-`npm`(または`yarn`)環境がある場合は、`npm run push -path='パス名'`(または`yarn run push`)で記事を下書き状態で新規作成できます
+
+
 
