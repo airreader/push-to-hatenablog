@@ -4,10 +4,10 @@
  - PullRequestにて変更点を作成し、それがマージされたタイミングではてなブログの記事も更新されます
 
 ## セットアップ
-### GitHubリポジトリの追加
+### 1. GitHubリポジトリの追加
 はてなブログ記事の管理用にGitHubリポジトリを作成してください。
 
-### Secretの追加
+### 2. Secretの追加
 GitHubリポジトリに以下の２つのSecretを追加してください。  
 GitHubアクションで記事を更新するために使用します。
 * `DOMAIN`という名前でSecretを追加してください。値にはブログのドメイン名を設定してください。
@@ -24,21 +24,21 @@ default:\n
 
 [暗号化されたシークレットの作成と保存 #暗号化されたシークレットの作成](https://help.github.com/ja/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets#about-encrypted-secrets)
 
-### 記事の同期
+### 3.全記事の同期
 issueテンプレートから「全記事同期用テンプレート」を選択肢、issueを作成してください。
 このissueを閉じると、mainブランチにすべての記事が同期されます。
 
-### ローカル環境のセットアップ
-(ローカル環境から利用しない場合には不要です)
-#### `blogsync.yaml`の追加
+
+
+### 4.ローカル環境のセットアップ (ローカル環境から利用しない場合には不要です)
+#### #`blogsync.yaml`の追加
 `blogsync.example.yaml`を`blogsync.yaml`に変更して、ドメイン名やユーザ名を書き換えてください。  
 ローカル環境から記事を新規追加するために使用します。
 
 `blogsync.yaml`については、以下のページを参照してください。
 
 [x-motemen/blogsync #Configuration](https://github.com/x-motemen/blogsync#configuration)
-
-#### `.env、` の追加
+#### `.env` の追加
 .env`ファイルを作成して`DOMAIN=[ブログのドメイン]`を追加してください。
 
 
