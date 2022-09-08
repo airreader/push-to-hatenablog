@@ -48,7 +48,7 @@ jobs:
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
         git diff --name-only ${{env.MAIN_SHA}} ${{github.event.pull_request.head.sha}} -- \
-        | grep '^${DOMAIN}' \
+        | grep "^${{ secrets.DOMAIN }}" \
         | xargs -t -n1 ~/go/bin/blogsync push
     # - name: notify to slack
     #   uses: mm0202/action_slack-notify@master
