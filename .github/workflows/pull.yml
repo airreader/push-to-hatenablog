@@ -11,13 +11,13 @@ jobs:
     if: startsWith(github.event.issue.title, 'Pull:')
     steps:
 
-    - name: Set up Go 1.13
-      uses: actions/setup-go@v1
+    - name: Set up Go 1.19.4
+      uses: actions/setup-go@v3
       with:
-        go-version: 1.13
+        go-version: 1.19.4
       id: go
 
-    - uses: actions/cache@v1
+    - uses: actions/cache@v3
       with:
         path: ~/go/bin/
         key: ${{ runner.os }}-go-blogsync-200423.0756
@@ -33,7 +33,7 @@ jobs:
         BSY: ${{ secrets.BSY }}
       run: |
         if !(type ~/go/bin/blogsync > /dev/null 2>&1); then
-          go get github.com/x-motemen/blogsync;
+          go install github.com/x-motemen/blogsync@latest;
         fi
         echo -e ${BSY} > blogsync.yaml
     - name: pull
